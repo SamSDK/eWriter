@@ -1,103 +1,195 @@
-import Image from "next/image";
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Mic, FileText, BarChart3, Settings } from 'lucide-react';
+import AudioRecorder from '@/components/AudioRecorder';
+import TranscriptionView from '@/components/TranscriptionView';
+import SummaryView from '@/components/SummaryView';
+import SettingsPanel, { TranscriptionSettings } from '@/components/SettingsPanel';
+
+type View = 'recording' | 'transcription' | 'summary';
+
+interface TranscriptionData {
+  text: string;
+  speakers: Array<{
+    speaker: string;
+    text: string;
+    timestamp: number;
+  }>;
+  duration: number;
+}
+
+interface SummaryData {
+  keyTopics: string[];
+  medications: Array<{
+    name: string;
+    dosage?: string;
+    frequency?: string;
+    notes?: string;
+  }>;
+  actionItems: string[];
+  patientConcerns: string[];
+  pharmacistRecommendations: string[];
+}
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [currentView, setCurrentView] = useState<View>('recording');
+  const [transcriptionData, setTranscriptionData] = useState<TranscriptionData | null>(null);
+  const [summaryData, setSummaryData] = useState<SummaryData | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [settings, setSettings] = useState<TranscriptionSettings>({
+    provider: 'openai',
+    summarizer: 'openai',
+    openaiApiKey: '',
+    googleApiKey: '',
+    googleProjectId: '',
+    language: 'en-US',
+    model: 'whisper-1'
+  });
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  // Load settings from localStorage on component mount
+  useEffect(() => {
+    const savedSettings = localStorage.getItem('transcriptionSettings');
+    if (savedSettings) {
+      try {
+        setSettings(JSON.parse(savedSettings));
+      } catch (error) {
+        console.error('Error loading settings:', error);
+      }
+    }
+  }, []);
+
+  const navigationItems = [
+    {
+      id: 'recording' as View,
+      label: 'Recording',
+      icon: Mic,
+      description: 'Record pharmacy consultation'
+    },
+    {
+      id: 'transcription' as View,
+      label: 'Transcription',
+      icon: FileText,
+      description: 'View and edit transcript',
+      disabled: !transcriptionData
+    },
+    {
+      id: 'summary' as View,
+      label: 'Summary',
+      icon: BarChart3,
+      description: 'AI-generated summary',
+      disabled: !summaryData
+    }
+  ];
+
+  const handleTranscriptionComplete = (data: TranscriptionData) => {
+    setTranscriptionData(data);
+    setCurrentView('transcription');
+  };
+
+  const handleSummaryComplete = (data: SummaryData) => {
+    setSummaryData(data);
+    setCurrentView('summary');
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <h1 className="text-xl font-bold text-gray-900">
+                  Pharmacy AI Summarizer
+                </h1>
+              </div>
+            </div>
+            <div className="flex items-center space-x-4">
+              <button
+                className="p-2 text-gray-400 hover:text-gray-500"
+                onClick={() => setIsSettingsOpen(true)}
+                title="Settings"
+              >
+                <Settings className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
         </div>
+      </header>
+
+      {/* Navigation */}
+      <nav className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex space-x-8">
+            {navigationItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setCurrentView(item.id)}
+                  disabled={item.disabled}
+                  className={`flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                    currentView === item.id
+                      ? 'border-blue-500 text-blue-600'
+                      : item.disabled
+                      ? 'border-transparent text-gray-400 cursor-not-allowed'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  <Icon className="h-5 w-5" />
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </nav>
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {isLoading && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 flex items-center space-x-3">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+              <span className="text-gray-700">Processing...</span>
+            </div>
+          </div>
+        )}
+
+        {currentView === 'recording' && (
+          <AudioRecorder
+            onTranscriptionComplete={handleTranscriptionComplete}
+            onSummaryComplete={handleSummaryComplete}
+            setIsLoading={setIsLoading}
+            settings={settings}
+          />
+        )}
+
+        <SettingsPanel
+          isOpen={isSettingsOpen}
+          onClose={() => setIsSettingsOpen(false)}
+          onSettingsChange={setSettings}
+          currentSettings={settings}
+        />
+
+        {currentView === 'transcription' && transcriptionData && (
+          <TranscriptionView
+            data={transcriptionData}
+            onSummaryComplete={handleSummaryComplete}
+            setIsLoading={setIsLoading}
+            settings={settings}
+          />
+        )}
+
+        {currentView === 'summary' && summaryData && (
+          <SummaryView
+            data={summaryData}
+            transcriptionData={transcriptionData}
+          />
+        )}
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
     </div>
   );
 }

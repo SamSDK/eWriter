@@ -20,11 +20,6 @@ interface SummaryData {
 
 interface TranscriptionData {
   text: string;
-  speakers: Array<{
-    speaker: string;
-    text: string;
-    timestamp: number;
-  }>;
   duration: number;
 }
 

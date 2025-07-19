@@ -1,20 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || '',
 });
 
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || '');
+
 export async function POST(request: NextRequest) {
   try {
-    if (!process.env.OPENAI_API_KEY) {
-      return NextResponse.json(
-        { error: 'OpenAI API key not configured' },
-        { status: 500 }
-      );
-    }
-
-    const { text } = await request.json();
+    const { text, summarizer = 'openai' } = await request.json();
 
     if (!text) {
       return NextResponse.json(
@@ -55,26 +51,48 @@ Guidelines:
 
 Return only valid JSON without any additional text.`;
 
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4',
-      messages: [
-        {
-          role: 'system',
-          content: 'You are a pharmacy AI assistant that creates structured summaries of pharmacy consultations. Always respond with valid JSON.'
-        },
-        {
-          role: 'user',
-          content: prompt
-        }
-      ],
-      temperature: 0.3,
-      max_tokens: 2000,
-    });
+    let responseText = '';
 
-    const responseText = completion.choices[0]?.message?.content;
-    
+    if (summarizer === 'openai') {
+      if (!process.env.OPENAI_API_KEY) {
+        return NextResponse.json(
+          { error: 'OpenAI API key not configured' },
+          { status: 500 }
+        );
+      }
+
+      const completion = await openai.chat.completions.create({
+        model: 'gpt-4o',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a pharmacy AI assistant that creates structured summaries of pharmacy consultations. Always respond with valid JSON.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        temperature: 0.3,
+        max_tokens: 2000,
+      });
+
+      responseText = completion.choices[0]?.message?.content || '';
+    } else if (summarizer === 'gemini') {
+      if (!process.env.GOOGLE_API_KEY) {
+        return NextResponse.json(
+          { error: 'Google API key not configured' },
+          { status: 500 }
+        );
+      }
+
+      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      const result = await model.generateContent(prompt);
+      responseText = result.response.text();
+    }
+
     if (!responseText) {
-      throw new Error('No response from OpenAI');
+      throw new Error('No response from AI service');
     }
 
     // Parse JSON response
@@ -91,8 +109,31 @@ Return only valid JSON without any additional text.`;
 
   } catch (error) {
     console.error('Summary generation error:', error);
+    
+    // Provide more specific error messages
+    if (error instanceof Error) {
+      if (error.message.includes('quota') || error.message.includes('429') || error.message.includes('insufficient_quota')) {
+        return NextResponse.json(
+          { error: 'OpenAI API quota exceeded. Please check your billing at https://platform.openai.com/account/billing or try using Google Gemini instead.' },
+          { status: 429 }
+        );
+      } else if (error.message.includes('API key')) {
+        return NextResponse.json(
+          { error: 'Invalid API key. Please check your configuration.' },
+          { status: 401 }
+        );
+      } else if (error.message.includes('SERVICE_DISABLED') || error.message.includes('Generative Language API')) {
+        return NextResponse.json(
+          { 
+            error: 'Google Gemini API not enabled. Please follow these steps:\n1. Go to https://console.developers.google.com/apis/api/generativelanguage.googleapis.com/overview\n2. Click "Enable" for the Generative Language API\n3. Wait a few minutes for the change to take effect\n4. Try again. If you continue to have issues, try using OpenAI instead.' 
+          },
+          { status: 403 }
+        );
+      }
+    }
+    
     return NextResponse.json(
-      { error: 'Summary generation failed' },
+      { error: 'Summary generation failed. Please try again.' },
       { status: 500 }
     );
   }

@@ -21,8 +21,8 @@ export interface TranscriptionSettings {
 }
 
 const defaultSettings: TranscriptionSettings = {
-  provider: 'openai',
-  summarizer: 'openai',
+  provider: 'google',
+  summarizer: 'gemini',
   openaiApiKey: '',
   googleApiKey: '',
   googleProjectId: '',
@@ -56,12 +56,12 @@ export default function SettingsPanel({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">Settings</h2>
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Settings</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-gray-200"
             title="Close settings"
           >
             <X className="h-6 w-6" />
@@ -71,13 +71,13 @@ export default function SettingsPanel({
         <div className="p-6 space-y-6">
           {/* Provider Selection */}
           <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Transcription Provider</h3>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Transcription Provider</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div
                 className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
                   settings.provider === 'openai'
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-200 hover:border-gray-300'
+                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                    : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
                 }`}
                 onClick={() => setSettings({ ...settings, provider: 'openai' })}
               >
@@ -86,8 +86,8 @@ export default function SettingsPanel({
                     <Mic className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900">OpenAI Whisper</h4>
-                    <p className="text-sm text-gray-600">High accuracy, $0.006/minute</p>
+                    <h4 className="font-medium text-gray-900 dark:text-white">OpenAI Whisper</h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">High accuracy, $0.006/minute</p>
                   </div>
                 </div>
               </div>
@@ -95,8 +95,8 @@ export default function SettingsPanel({
               <div
                 className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
                   settings.provider === 'google'
-                    ? 'border-green-500 bg-green-50'
-                    : 'border-gray-200 hover:border-gray-300'
+                    ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
+                    : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
                 }`}
                 onClick={() => setSettings({ ...settings, provider: 'google' })}
               >
@@ -105,8 +105,8 @@ export default function SettingsPanel({
                     <Globe className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900">Google Speech-to-Text</h4>
-                    <p className="text-sm text-gray-600">Free tier available, $0.006/minute</p>
+                    <h4 className="font-medium text-gray-900 dark:text-white">Google Speech-to-Text</h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">Free tier available, $0.006/minute</p>
                   </div>
                 </div>
               </div>
@@ -115,13 +115,13 @@ export default function SettingsPanel({
 
           {/* Summarizer Selection */}
           <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-4">AI Summarizer</h3>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">AI Summarizer</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div
                 className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
                   settings.summarizer === 'openai'
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-200 hover:border-gray-300'
+                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                    : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
                 }`}
                 onClick={() => setSettings({ ...settings, summarizer: 'openai' })}
               >
@@ -130,8 +130,8 @@ export default function SettingsPanel({
                     <Mic className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900">OpenAI GPT-4</h4>
-                    <p className="text-sm text-gray-600">Advanced AI summarization</p>
+                    <h4 className="font-medium text-gray-900 dark:text-white">OpenAI GPT-4</h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">Advanced AI summarization</p>
                   </div>
                 </div>
               </div>
@@ -139,8 +139,8 @@ export default function SettingsPanel({
               <div
                 className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
                   settings.summarizer === 'gemini'
-                    ? 'border-green-500 bg-green-50'
-                    : 'border-gray-200 hover:border-gray-300'
+                    ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
+                    : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
                 }`}
                 onClick={() => setSettings({ ...settings, summarizer: 'gemini' })}
               >
@@ -149,8 +149,11 @@ export default function SettingsPanel({
                     <Globe className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900">Google Gemini</h4>
-                    <p className="text-sm text-gray-600">Fast and cost-effective</p>
+                    <h4 className="font-medium text-gray-900 dark:text-white">Google Gemini</h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">Fast and cost-effective</p>
+                    <p className="text-xs text-orange-600 dark:text-orange-400 mt-1">
+                      ⚠️ Requires enabling Generative Language API in Google Cloud Console
+                    </p>
                   </div>
                 </div>
               </div>
@@ -160,9 +163,9 @@ export default function SettingsPanel({
           {/* OpenAI Settings */}
           {settings.provider === 'openai' && (
             <div className="space-y-4">
-              <h3 className="text-lg font-medium text-gray-900">OpenAI Configuration</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white">OpenAI Configuration</h3>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   OpenAI API Key
                 </label>
                 <div className="relative">
@@ -171,17 +174,17 @@ export default function SettingsPanel({
                     value={settings.openaiApiKey}
                     onChange={(e) => setSettings({ ...settings, openaiApiKey: e.target.value })}
                     placeholder="sk-..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
-                  <Key className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
+                  <Key className="absolute right-3 top-2.5 h-5 w-5 text-gray-400 dark:text-gray-500" />
                 </div>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   Get your API key from{' '}
                   <a
                     href="https://platform.openai.com/api-keys"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-600 hover:underline"
+                    className="text-blue-600 dark:text-blue-400 hover:underline"
                   >
                     OpenAI Platform
                   </a>
@@ -189,13 +192,13 @@ export default function SettingsPanel({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Model
                 </label>
                 <select
                   value={settings.model}
                   onChange={(e) => setSettings({ ...settings, model: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   title="Select OpenAI model"
                 >
                   <option value="whisper-1">Whisper-1 (Recommended)</option>
@@ -207,9 +210,9 @@ export default function SettingsPanel({
           {/* Google Settings */}
           {settings.provider === 'google' && (
             <div className="space-y-4">
-              <h3 className="text-lg font-medium text-gray-900">Google Cloud Configuration</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white">Google Cloud Configuration</h3>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Google Cloud API Key
                 </label>
                 <div className="relative">
@@ -218,17 +221,17 @@ export default function SettingsPanel({
                     value={settings.googleApiKey}
                     onChange={(e) => setSettings({ ...settings, googleApiKey: e.target.value })}
                     placeholder="AIza..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
-                  <Key className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
+                  <Key className="absolute right-3 top-2.5 h-5 w-5 text-gray-400 dark:text-gray-500" />
                 </div>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   Get your API key from{' '}
                   <a
                     href="https://console.cloud.google.com/apis/credentials"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-green-600 hover:underline"
+                    className="text-green-600 dark:text-green-400 hover:underline"
                   >
                     Google Cloud Console
                   </a>
@@ -236,7 +239,7 @@ export default function SettingsPanel({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Project ID
                 </label>
                 <input
@@ -244,21 +247,21 @@ export default function SettingsPanel({
                   value={settings.googleProjectId}
                   onChange={(e) => setSettings({ ...settings, googleProjectId: e.target.value })}
                   placeholder="your-project-id"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   Your Google Cloud Project ID
                 </p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Language
                 </label>
                 <select
                   value={settings.language}
                   onChange={(e) => setSettings({ ...settings, language: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   title="Select language for transcription"
                 >
                   <option value="en-US">English (US)</option>
@@ -276,43 +279,68 @@ export default function SettingsPanel({
             </div>
           )}
 
+          {/* Help Section */}
+          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Help & Troubleshooting</h3>
+            <div className="space-y-3 text-sm">
+              <div>
+                <h4 className="font-medium text-gray-900 dark:text-white mb-1">Google Gemini API Setup</h4>
+                <p className="text-gray-700 dark:text-gray-300 mb-2">
+                  If you get a "SERVICE_DISABLED" error when using Google Gemini:
+                </p>
+                <ol className="list-decimal list-inside text-gray-700 dark:text-gray-300 space-y-1 ml-2">
+                  <li>Go to <a href="https://console.developers.google.com/apis/api/generativelanguage.googleapis.com/overview" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">Google Cloud Console</a></li>
+                  <li>Click "Enable" for the Generative Language API</li>
+                  <li>Wait a few minutes for the change to take effect</li>
+                  <li>Try again, or use OpenAI as an alternative</li>
+                </ol>
+              </div>
+              <div>
+                <h4 className="font-medium text-gray-900 dark:text-white mb-1">API Quota Issues</h4>
+                <p className="text-gray-700 dark:text-gray-300">
+                  If you exceed API quotas, try switching to a different provider or check your billing settings.
+                </p>
+              </div>
+            </div>
+          </div>
+
           {/* Pricing Information */}
-          <div className="bg-gray-50 rounded-lg p-4">
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Pricing Information</h3>
+          <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Pricing Information</h3>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span>OpenAI Whisper:</span>
-                <span>$0.006 per minute</span>
+                <span className="text-gray-700 dark:text-gray-300">OpenAI Whisper:</span>
+                <span className="text-gray-700 dark:text-gray-300">$0.006 per minute</span>
               </div>
               <div className="flex justify-between">
-                <span>Google Speech-to-Text:</span>
-                <span>$0.006 per minute (60 minutes free/month)</span>
+                <span className="text-gray-700 dark:text-gray-300">Google Speech-to-Text:</span>
+                <span className="text-gray-700 dark:text-gray-300">$0.006 per minute (60 minutes free/month)</span>
               </div>
-              <p className="text-xs text-gray-600 mt-2">
+              <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
                 * Google offers 60 minutes of free transcription per month
               </p>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center justify-between p-6 border-t border-gray-200">
+        <div className="flex items-center justify-between p-6 border-t border-gray-200 dark:border-gray-700">
           <button
             onClick={handleReset}
-            className="text-gray-600 hover:text-gray-800"
+            className="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
           >
             Reset to Defaults
           </button>
           <div className="flex space-x-3">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+              className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 flex items-center space-x-2"
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 dark:disabled:bg-gray-600 flex items-center space-x-2"
             >
               <Save className="h-4 w-4" />
               <span>{isSaving ? 'Saving...' : 'Save Settings'}</span>

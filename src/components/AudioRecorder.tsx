@@ -7,11 +7,6 @@ import { TranscriptionSettings } from '@/components/SettingsPanel';
 
 interface TranscriptionData {
   text: string;
-  speakers: Array<{
-    speaker: string;
-    text: string;
-    timestamp: number;
-  }>;
   duration: number;
 }
 
@@ -260,8 +255,8 @@ export default function AudioRecorder({
 
   return (
     <div className="max-w-2xl mx-auto">
-      <div className="bg-white rounded-lg shadow-lg p-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 text-center">
           Record Pharmacy Consultation
         </h2>
 
@@ -309,7 +304,7 @@ export default function AudioRecorder({
         
         {/* Recording Tip */}
         <div className="text-center mb-6">
-          <p className="text-sm text-orange-600 bg-orange-50 px-4 py-2 rounded-lg inline-block">
+          <p className="text-sm text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20 px-4 py-2 rounded-lg inline-block">
             ⚠️ Important: Google Speech-to-Text has a 30-second limit for browser recordings. 
             For longer audio, please upload a file instead.
           </p>
@@ -353,18 +348,18 @@ export default function AudioRecorder({
             {...getRootProps()}
             className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
               isDragActive
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-300 hover:border-gray-400'
+                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
             }`}
           >
             <input {...getInputProps()} />
-            <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600">
+            <Upload className="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+            <p className="text-gray-600 dark:text-gray-300">
               {isDragActive
                 ? 'Drop the audio file here...'
                 : 'Drag & drop an audio file here, or click to select'}
             </p>
-            <p className="text-sm text-gray-500 mt-2">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
               Supports MP3, WAV, M4A, WebM, OGG
             </p>
           </div>

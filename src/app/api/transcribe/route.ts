@@ -47,12 +47,8 @@ export async function POST(request: NextRequest) {
       timestamp_granularities: ['word'],
     });
 
-    // Process transcription for speaker identification
-    const speakers = processSpeakerSegments(transcription.text, transcription.words || [] as Array<{word: string, start: number, end: number}>);
-
     return NextResponse.json({
       text: transcription.text,
-      speakers,
       duration: transcription.duration || 0,
     });
 
@@ -91,53 +87,4 @@ export async function POST(request: NextRequest) {
   }
 }
 
-function processSpeakerSegments(text: string, _words: Array<{word: string, start: number, end: number}>) {
-  // Simple speaker identification based on sentence patterns
-  const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
-  const speakers = [];
-  
-  let currentSpeaker = 'Pharmacist';
-  let currentText = '';
-  let timestamp = 0;
-
-  for (let i = 0; i < sentences.length; i++) {
-    const sentence = sentences[i].trim();
-    
-    // Simple heuristic: questions are usually from patients
-    const isQuestion = sentence.includes('?') || 
-                      sentence.toLowerCase().includes('what') ||
-                      sentence.toLowerCase().includes('how') ||
-                      sentence.toLowerCase().includes('when') ||
-                      sentence.toLowerCase().includes('why') ||
-                      sentence.toLowerCase().includes('can you') ||
-                      sentence.toLowerCase().includes('could you');
-
-    // Medical terminology suggests pharmacist
-    const hasMedicalTerms = sentence.toLowerCase().includes('dosage') ||
-                           sentence.toLowerCase().includes('side effect') ||
-                           sentence.toLowerCase().includes('medication') ||
-                           sentence.toLowerCase().includes('prescription') ||
-                           sentence.toLowerCase().includes('pharmacy');
-
-    if (isQuestion && !hasMedicalTerms) {
-      currentSpeaker = 'Patient';
-    } else if (hasMedicalTerms) {
-      currentSpeaker = 'Pharmacist';
-    }
-
-    currentText += sentence + '. ';
-    timestamp += 30; // Approximate 30 seconds per sentence
-
-    // Add speaker segment every few sentences
-    if (i % 2 === 1 || i === sentences.length - 1) {
-      speakers.push({
-        speaker: currentSpeaker,
-        text: currentText.trim(),
-        timestamp: timestamp - 30
-      });
-      currentText = '';
-    }
-  }
-
-  return speakers;
-} 
+ 

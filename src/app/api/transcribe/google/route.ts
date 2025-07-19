@@ -126,23 +126,27 @@ export async function POST(request: NextRequest) {
       .map((result: any) => result.alternatives[0].transcript)
       .join(' ');
 
-    // Extract word-level timestamps
-    const words = data.results
-      .flatMap((result: any) => 
-        result.alternatives[0].words?.map((word: any) => ({
-          word: word.word,
-          start: word.startTime?.seconds || 0,
-          end: word.endTime?.seconds || 0,
-        })) || []
-      );
-
-    // Process speaker segments
-    const speakers = processSpeakerSegments(transcription, words);
+    // Calculate duration from the last word's end time or estimate from audio length
+    let duration = 0;
+    if (data.results[0]?.alternatives[0]?.words?.length > 0) {
+      const lastWord = data.results[0].alternatives[0].words[data.results[0].alternatives[0].words.length - 1];
+      if (lastWord.endTime) {
+        // Convert from Google's time format (seconds.nanos) to seconds
+        duration = parseFloat(lastWord.endTime.seconds || '0') + 
+                   parseFloat(lastWord.endTime.nanos || '0') / 1000000000;
+      }
+    }
+    
+    // If no duration from words, estimate from audio file size and format
+    if (duration === 0) {
+      // Rough estimation: assume 16kbps bitrate for speech
+      const estimatedDuration = Math.round(audioFile.size / (16000 / 8));
+      duration = Math.max(estimatedDuration, 1); // Minimum 1 second
+    }
 
     return NextResponse.json({
       text: transcription,
-      speakers,
-      duration: words.length > 0 ? words[words.length - 1].end : 0,
+      duration: Math.round(duration),
       provider: 'google'
     });
 
@@ -170,53 +174,4 @@ export async function POST(request: NextRequest) {
   }
 }
 
-function processSpeakerSegments(text: string, words: Array<{word: string, start: number, end: number}>) {
-  // Simple speaker identification based on sentence patterns
-  const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
-  const speakers = [];
-  
-  let currentSpeaker = 'Pharmacist';
-  let currentText = '';
-  let timestamp = 0;
-
-  for (let i = 0; i < sentences.length; i++) {
-    const sentence = sentences[i].trim();
-    
-    // Simple heuristic: questions are usually from patients
-    const isQuestion = sentence.includes('?') || 
-                      sentence.toLowerCase().includes('what') ||
-                      sentence.toLowerCase().includes('how') ||
-                      sentence.toLowerCase().includes('when') ||
-                      sentence.toLowerCase().includes('why') ||
-                      sentence.toLowerCase().includes('can you') ||
-                      sentence.toLowerCase().includes('could you');
-
-    // Medical terminology suggests pharmacist
-    const hasMedicalTerms = sentence.toLowerCase().includes('dosage') ||
-                           sentence.toLowerCase().includes('side effect') ||
-                           sentence.toLowerCase().includes('medication') ||
-                           sentence.toLowerCase().includes('prescription') ||
-                           sentence.toLowerCase().includes('pharmacy');
-
-    if (isQuestion && !hasMedicalTerms) {
-      currentSpeaker = 'Patient';
-    } else if (hasMedicalTerms) {
-      currentSpeaker = 'Pharmacist';
-    }
-
-    currentText += sentence + '. ';
-    timestamp += 30; // Approximate 30 seconds per sentence
-
-    // Add speaker segment every few sentences
-    if (i % 2 === 1 || i === sentences.length - 1) {
-      speakers.push({
-        speaker: currentSpeaker,
-        text: currentText.trim(),
-        timestamp: timestamp - 30
-      });
-      currentText = '';
-    }
-  }
-
-  return speakers;
-} 
+ 
